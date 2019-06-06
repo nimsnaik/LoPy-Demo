@@ -1,5 +1,7 @@
 from network import LoRa
 from machine import Pin
+from LIS2HH12 import LIS2HH12
+from pytrack import Pytrack
 import socket
 import time
 import binascii
@@ -22,6 +24,9 @@ app_key = binascii.unhexlify('235ec3907acfe735b0ed665882903526'.replace(' ',''))
 
 # Get the DevEUI from the node
 print('DevEUI ', binascii.hexlify(lora.mac()))
+
+py = Pytrack()
+acc = LIS2HH12(py)
 
 # Quick Join in the US
 for i in range(8, 72):
@@ -88,9 +93,12 @@ while True:
         s.setblocking(True)
         # send some data
         if(is_pressed):
-            s.send(bytes([cnt, 1, 0]))
+            # s.send(bytes([cnt, 1, 0]))
+            msg = struct.pack("ff", acc.roll(), acc.pitch())
         else:
-            s.send(bytes([cnt, 0, 0]))
+            msg = struct.pack("ff", 5, 5)
+            # s.send(bytes([cnt, 0, 0]))
+        s.send(msg)
         print( cnt, ' Sending...' )
 
     except Exception as e:
